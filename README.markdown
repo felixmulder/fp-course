@@ -1,23 +1,10 @@
 # Functional Programming Course
+This is a fork of the Data61 [fp-course](https://github.com/data61/fp-course) repo.
 
-![Data61](http://i.imgur.com/0h9dFhl.png)
+Written by Tony Morris & Mark Hibberd for Data61.
 
-### Written by Tony Morris & Mark Hibberd for Data61 (formerly NICTA)
-
-### With contributions from individuals (thanks!)
-
-#### Special note 1
-
-If you have arrived here by https://github.com/data61/fp-course and you are
-looking for the *answers* (not the exercises), please go to https://github.com/tonymorris/fp-course
-
-#### Special note 2
-
-As of February 2017, this repository is taking the place of the repository hosted at
-https://github.com/NICTA/course which is deprecated.
-
-Data61 replaces what was NICTA since July 2016. The new repository is located at
-https://github.com/data61/fp-course.
+### Getting Help
+For answers, please go to https://github.com/tonymorris/fp-course
 
 #### Introduction
 
@@ -34,57 +21,56 @@ The exercises are designed in a way that requires personal guidance, so if you
 attempt it on your own and feel a little lost, this is normal. All the
 instructions are not contained herein.
 
-### Getting Help
-
-There are two mailing lists for asking questions. All questions are welcome,
-however, your first post might be moderated. This is simply to prevent spam.
-
-1. [[nicta-fp]](https://groups.google.com/forum/#!forum/nicta-fp) is a Google
-   Group for any queries related to functional programming. This mailing list is
-   owned by Data61 and is open to the public. Questions relating to this course
-   are most welcome here.
-
-2. [[haskell-exercises]](https://groups.google.com/forum/#!forum/haskell-exercises)
-   is a Google Group for queries related specifically to this Data61 functional
-   programming course material. This mailing list is not owned by Data61, but is
-   run by others who are keen to share ideas relating to the course.
-
-3. \#nicta-course [on Freenode](irc://irc.freenode.net/#nicta-course) is an IRC channel that
-   is operated by others who are going through this course material on their
-   own time and effort.
-
-4. \#qfpl [on Freenode](irc://irc.freenode.net/#qfpl) is the IRC channel of the
-   Queensland Functional Programming Lab - the team that runs the course in Brisbane.
-
-5. \#scalaz [on Freenode](irc://irc.freenode.net/#scalaz) is an IRC channel that is operated
-   by others who are keen to share ideas relating to functional programming in
-   general. Most of the participants of this channel have completed the Data61
-   functional programming course to some extent. They are in various timezones
-   and share a passion for functional programming, so may be able to provide
-   relatively quick assistance with questions.
-
 ### Getting Started
 
-**NOTE** If you do not wish to install these dependencies, you may use a virtual machine
-instead. [Instructions](ops/README.md) for automatically building a virtual machine are
-available in this repository for your convenience.
+1. Install nix for package management: https://nixos.org/nix/
 
-1. Install the Glasgow Haskell Compiler (GHC) version 7.10 or higher.
+```bash
+$ sh <(curl https://nixos.org/nix/install) --no-daemon
+```
 
-2. Change to the directory containing this document.
+2. Get into the nix-shell, this is an env that makes sure all dependencies
+   exist.
 
-3. Execute the command `ghci`, which will compile and load all the source code.
-   You may need to set permissions on the root directory and the ghci configuration
-   file, `chmod go-w .ghci ./`.
+```
+$ nix-shell
+[nix-shell:<path-to>/fp-course]$ which cabal # you should see something like:
+/nix/store/gy0xjzfa032w7snzzsrmkv3z7rr68cq1-ghc-8.4.3-with-packages/bin/cabal
 
-4. Inspect the introductory modules to get a feel for Haskell's syntax, then move
-   on to the exercises starting with `Course.Optional`. The
-   [Progression](#progression) section of this document lists the recommended
-   order in which to attempt the exercises.
+[nix-shell:<path-to>/fp-course]$ cabal build # this will build the project
+```
 
-5. Edit a source file to a proposed solution to an exercise. At the `ghci`
-   prompt, issue the command `:reload`. This will compile your solution and
-   reload it in the GHC interpreter. You may use `:r` for short.
+3. Your project is now ready for experimentation!
+
+### How-tos
+
+#### How to run all tests
+```
+[nix-shell:<path-to>/fp-course]$ cabal test
+```
+
+#### How to run a specific test
+```
+[nix-shell:<path-to>/fp-course]$ cabal test tasty --show-detail=direct --test-option=--pattern="Tests.List."
+[nix-shell:<path-to>/fp-course]$ cabal test tasty --show-detail=direct --test-option=--pattern="List.headOr"
+```
+
+#### Run a specific test from within REPL
+```
+[nix-shell:<path-to>/fp-course]$ cabal repl course
+> -- import the defaultMain function from Tasty - runs something of type TestTree
+> import Test.Tasty (defaultMain)
+>
+> -- Load the test module you'd like to run tests for
+> :l test/Course/ListTest.hs
+>
+> -- Browse the contents of the loaded module - anything of type TestTree
+> -- may be run
+> :browse Course.ListTest
+>
+> -- Run test for a particular function
+> defaultMain headOrTest
+```
 
 ### Tips after having started
 
@@ -163,68 +149,7 @@ available in this repository for your convenience.
 
 6. Do not use the stack build tool. It does not work.
 
-### Running the tests
-
-Tests are available as a [tasty](https://hackage.haskell.org/package/tasty)
-test suite.
-
-#### tasty
-
-Tasty tests are stored under the `test/` directory. Each module from the course
-that has tests has a corresponding `<MODULE>Test.hs` file. Within each test
-module, tests for each function are grouped using the `testGroup` function.
-Within each test group there are test cases (`testCase` function), and
-properties (`testProperty` function).
-
-Before running the tests, ensure that you have an up-to-date installation
-of GHC and cabal-install from your system package manager or use the minimal
-installers found at [haskell.org](https://www.haskell.org/downloads#minimal).
-
-To run the full test suite, build the project as follows:
-
-    > cabal update
-    > cabal install --only-dependencies --enable-tests
-    > cabal configure --enable-tests
-    > cabal build
-    > cabal test
-
-Tasty will also allow you to run only those tests whose description match a
-pattern. Tests are organised in nested groups named after the relevant module
-and function, so pattern matching should be intuitive. For example, to run the
-tests for the `List` module you could run:
-
-    > cabal test tasty --show-detail=direct --test-option=--pattern="Tests.List."
-
-Likewise, to run only the tests for the `headOr` function in the `List` module, you could use:
-
-    > cabal test tasty --show-detail=direct --test-option=--pattern="List.headOr"
-
-In addition, GHCi may be used to run tasty tests. Assuming you have run `ghci`
-from the root of the project, you may do the following. Remember that GHCi has
-tab completion, so you can save yourself some typing.
-
-    > -- import the defaultMain function from Tasty - runs something of type TestTree
-    > import Test.Tasty (defaultMain)
-    >
-    > -- Load the test module you'd like to run tests for
-    > :l test/Course/ListTest.hs
-    >
-    > -- Browse the contents of the loaded module - anything of type TestTree
-    > -- may be run
-    > :browse Course.ListTest
-    >
-    > -- Run test for a particular function
-    > defaultMain headOrTest
-
-
-#### doctest
-
-The doctest tests are a mirror of the tasty tests that reside in comments
-alongside the code. They are not executable, but examples can be copied into
-GHCI. Examples begin with `>>>` while properties begin with `prop>`.
-
 ### Progression
-
 It is recommended to perform some exercises before others. The first step is to
 inspect the introduction modules.
 
@@ -271,44 +196,34 @@ Answers for the exercises can be found here:
 
 After these are completed, complete the exercises in the `projects` directory.
 
-### Leksah
+### Getting Help outside Klarna
 
-If you choose to use the [Leksah IDE for Haskell](http://leksah.org/), the
-following tips are recommended:
+There are two mailing lists for asking questions. All questions are welcome,
+however, your first post might be moderated. This is simply to prevent spam.
 
-* [Install Leksah from github](https://github.com/leksah/leksah#getting-leksah).
-  If you are using Nix to install Leksah launch it with `./leksah-nix.sh ghc822`
-  as the Nix files for this course use GHC 8.2.2.
-* Clone this fp-course git repo use File -> Open Project to open the cabal.project file.
-* Mouse over the toolbar items near the middle of toolbar to see the names of them.
-  Set the following items on/off:
-  * `Build in the background and report errors` ON - unless you prefer to triger builds
-     manualy with Ctrl + B to build (Command + B on OS X)
-  * `Use GHC to compile` ON
-  * `Use GHCJS to compile` OFF
-  * `Use GHCi debugger to build and run` ON
-  * `Make documentation while building` OFF
-  * `Run unit tests when building` ON
-  * `Run benchmakrs when building` OFF
-  * `Make dependent packages` ON
-* If you are using Nix, click on the nix button on the toolbar (tool tip is "Refresh
-  Leksah's cached nix environment variables for the active project").  This will use
-  `nix-shell` to build an environment for running the builds in.  If `nix-shell` has
-  not been run before for the `fp-course` repo it may take some time to complete.
-  When it is finished a line of green '-' characters should be printed in the Panes -> Log.
-* Restart Leksah as there is a bug in the metadata collection that
-  will prevent it from indexing the new project without a restart.
-* Ctrl + B to build (Command + B on OS X).
-* The test failures should show up in Panes -> Errors.
-* Pane -> Log often has useful error messages.
-* Ctrl + J (Command + J on OS X) selects the next item in
-  Errors pane and goes to it in the source (hold down Shift
-  to go to previous item).
-* Ctrl + Enter on a line starting "-- >>>" will run the
-  selected expression in GHCi (Ctrl + Enter on OS X too).
-  The output goes to Panes -> Log (on Linux it will also show up in Panes -> Output).
-* The last GHCi expression is reevaluated after each :reload
-  triggered by changes in the code.
+1. [[nicta-fp]](https://groups.google.com/forum/#!forum/nicta-fp) is a Google
+   Group for any queries related to functional programming. This mailing list is
+   owned by Data61 and is open to the public. Questions relating to this course
+   are most welcome here.
+
+2. [[haskell-exercises]](https://groups.google.com/forum/#!forum/haskell-exercises)
+   is a Google Group for queries related specifically to this Data61 functional
+   programming course material. This mailing list is not owned by Data61, but is
+   run by others who are keen to share ideas relating to the course.
+
+3. \#nicta-course [on Freenode](irc://irc.freenode.net/#nicta-course) is an IRC channel that
+   is operated by others who are going through this course material on their
+   own time and effort.
+
+4. \#qfpl [on Freenode](irc://irc.freenode.net/#qfpl) is the IRC channel of the
+   Queensland Functional Programming Lab - the team that runs the course in Brisbane.
+
+5. \#scalaz [on Freenode](irc://irc.freenode.net/#scalaz) is an IRC channel that is operated
+   by others who are keen to share ideas relating to functional programming in
+   general. Most of the participants of this channel have completed the Data61
+   functional programming course to some extent. They are in various timezones
+   and share a passion for functional programming, so may be able to provide
+   relatively quick assistance with questions.
 
 ### Introducing Haskell
 
